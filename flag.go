@@ -122,7 +122,8 @@ const (
 
 // ParseErrorsWhitelist defines the parsing errors that can be ignored
 type ParseErrorsWhitelist struct {
-	// UnknownFlags will ignore unknown flags errors and continue parsing rest of the flags
+	// UnknownFlags will ignore unknown flags errors and continue parsing the rest of the flags.
+	// Consider using SetUnknownFlags/GetUnknownFlags if you need to know which unknown flags occured.
 	UnknownFlags bool
 }
 
@@ -162,6 +163,7 @@ type FlagSet struct {
 	output            io.Writer // nil means stderr; use Output() accessor
 	interspersed      bool      // allow interspersed option/non-option args
 	normalizeNameFunc func(f *FlagSet, name string) NormalizedName
+	unknownFlags      *[]string
 
 	addedGoFlagSets []*goflag.FlagSet
 }
@@ -964,10 +966,17 @@ func (f *FlagSet) usage() {
 	}
 }
 
+func (f *FlagSet) addUnknownFlag(s string) {
+	if f.unknownFlags == nil {
+		f.unknownFlags = new([]string)
+	}
+	*f.unknownFlags = append(*f.unknownFlags, s)
+}
+
 //--unknown (args will be empty)
 //--unknown --next-flag ... (args will be --next-flag ...)
 //--unknown arg ... (args will be arg ...)
-func stripUnknownFlagValue(args []string) []string {
+func (f *FlagSet) stripUnknownFlagValue(args []string) []string {
 	if len(args) == 0 {
 		//--unknown
 		return args
@@ -981,6 +990,7 @@ func stripUnknownFlagValue(args []string) []string {
 
 	//--unknown arg ... (args will be arg ...)
 	if len(args) > 1 {
+		f.addUnknownFlag(args[0])
 		return args[1:]
 	}
 	return nil
@@ -1007,13 +1017,14 @@ func (f *FlagSet) parseLongArg(s string, args []string, fn parseFunc) (a []strin
 			}
 			return
 		case f.ParseErrorsWhitelist.UnknownFlags:
+			f.addUnknownFlag(s)
 			// --unknown=unknownval arg ...
 			// we do not want to lose arg in this case
 			if len(split) >= 2 {
 				return a, nil
 			}
 
-			return stripUnknownFlagValue(a), nil
+			return f.stripUnknownFlagValue(a), nil
 		default:
 			err = f.failf("unknown flag: --%s", name)
 			return
@@ -1063,11 +1074,15 @@ func (f *FlagSet) parseSingleShortArg(shorthands string, args []string, fn parse
 			// '-f=arg arg ...'
 			// we do not want to lose arg in this case
 			if len(shorthands) > 2 && shorthands[1] == '=' {
+				f.addUnknownFlag("-" + shorthands)
 				outShorts = ""
 				return
 			}
 
-			outArgs = stripUnknownFlagValue(outArgs)
+			f.addUnknownFlag("-" + string(c))
+			if len(outShorts) == 0 {
+				outArgs = f.stripUnknownFlagValue(outArgs)
+			}
 			return
 		default:
 			err = f.failf("unknown shorthand flag: %q in -%s", c, shorthands)
@@ -1223,6 +1238,21 @@ func (f *FlagSet) Parsed() bool {
 	return f.parsed
 }
 
+// SetUnknownFlags sets the store for unknown flags found during Parse.
+// The argument s points to a slice variable in which to store the values.
+// This requires ParseErrorsWhitelist.UnknownFlags to be set so that
+// parsing does not abort on the first unknown flag.
+func (f *FlagSet) SetUnknownFlags(s *[]string) {
+	f.unknownFlags = s
+}
+
+// GetUnknownFlags returns unknown flags found during Parse.
+// This requires ParseErrorsWhitelist.UnknownFlags to be set so that
+// parsing does not abort on the first unknown flag.
+func (f *FlagSet) GetUnknownFlags() *[]string {
+	return f.unknownFlags
+}
+
 // Parse parses the command-line flags from os.Args[1:].  Must be called
 // after all flags are defined and before flags are accessed by the program.
 func Parse() {
@@ -1246,6 +1276,21 @@ func SetInterspersed(interspersed bool) {
 // Parsed returns true if the command-line flags have been parsed.
 func Parsed() bool {
 	return CommandLine.Parsed()
+}
+
+// SetUnknownFlags sets the store for unknown flags found during Parse.
+// The argument s points to a slice variable in which to store the values.
+// This requires ParseErrorsWhitelist.UnknownFlags to be set so that
+// parsing does not abort on the first unknown flag.
+func SetUnknownFlags(s *[]string) {
+	CommandLine.SetUnknownFlags(s)
+}
+
+// GetUnknownFlags returns unknown flags found during Parse.
+// This requires ParseErrorsWhitelist.UnknownFlags to be set so that
+// parsing does not abort on the first unknown flag.
+func GetUnknownFlags() *[]string {
+	return CommandLine.GetUnknownFlags()
 }
 
 // CommandLine is the default set of command-line flags, parsed from os.Args.
