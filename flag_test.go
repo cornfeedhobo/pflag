@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"os/exec"
 	"reflect"
 	"sort"
 	"strconv"
@@ -895,6 +896,33 @@ func TestOutput(t *testing.T) {
 	if out := buf.String(); !strings.Contains(out, expect) {
 		t.Errorf("expected output %q; got %q", expect, out)
 	}
+}
+
+func TestOutputExitOnError(t *testing.T) {
+	if os.Getenv("PFLAG_CRASH_TEST") == "1" {
+		fs := NewFlagSet(t.Name(), ExitOnError)
+		fs.Parse([]string{"--unknown"})
+		t.Fatal("this error should not be triggered")
+		return
+	}
+	mockStdout := bytes.NewBufferString("")
+	mockStderr := bytes.NewBufferString("")
+	cmd := exec.Command(os.Args[0], "-test.run="+t.Name())
+	cmd.Env = append(os.Environ(), "PFLAG_CRASH_TEST=1")
+	cmd.Stdout = mockStdout
+	cmd.Stderr = mockStderr
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		want := "unknown flag: --unknown\nUsage of " + t.Name() + ":\n"
+		if got := mockStderr.String(); got != want {
+			t.Errorf("got '%s', want '%s'", got, want)
+		}
+		if len(mockStdout.String()) != 0 {
+			t.Error("stdout should be empty")
+		}
+		return
+	}
+	t.Fatal("this error should not be triggered")
 }
 
 // This tests that one can reset the flags. This still works but not well, and is
