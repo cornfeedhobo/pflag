@@ -900,8 +900,9 @@ func TestOutput(t *testing.T) {
 
 func TestOutputExitOnError(t *testing.T) {
 	if os.Getenv("PFLAG_CRASH_TEST") == "1" {
-		fs := NewFlagSet(t.Name(), ExitOnError)
-		fs.Parse([]string{"--unknown"})
+		CommandLine = NewFlagSet(t.Name(), ExitOnError)
+		os.Args = []string{t.Name(), "--unknown"}
+		Parse()
 		t.Fatal("this error should not be triggered")
 		return
 	}
@@ -917,8 +918,8 @@ func TestOutputExitOnError(t *testing.T) {
 		if got := mockStderr.String(); got != want {
 			t.Errorf("got '%s', want '%s'", got, want)
 		}
-		if len(mockStdout.String()) != 0 {
-			t.Error("stdout should be empty")
+		if got := mockStdout.String(); len(got) != 0 {
+			t.Errorf("stdout should be empty, got: %s", got)
 		}
 		return
 	}
