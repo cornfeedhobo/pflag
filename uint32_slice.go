@@ -128,6 +128,15 @@ func (f *FlagSet) GetUint32Slice(name string) ([]uint32, error) {
 	return val.([]uint32), nil
 }
 
+// MustGetUint32Slice is like GetUint32Slice, but panics on error.
+func (f *FlagSet) MustGetUint32Slice(name string) []uint32 {
+	val, err := f.GetUint32Slice(name)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 // Uint32SliceVar defines a uint32Slice flag with specified name, default value, and usage string.
 // The argument p pouints to a []uint32 variable in which to store the value of the flag.
 func (f *FlagSet) Uint32SliceVar(p *[]uint32, name string, value []uint32, usage string) {

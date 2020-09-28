@@ -128,6 +128,15 @@ func (f *FlagSet) GetUint8Slice(name string) ([]uint8, error) {
 	return val.([]uint8), nil
 }
 
+// MustGetUint8Slice is like GetUint8Slice, but panics on error.
+func (f *FlagSet) MustGetUint8Slice(name string) []uint8 {
+	val, err := f.GetUint8Slice(name)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 // Uint8SliceVar defines a uint8Slice flag with specified name, default value, and usage string.
 // The argument p pouints to a []uint8 variable in which to store the value of the flag.
 func (f *FlagSet) Uint8SliceVar(p *[]uint8, name string, value []uint8, usage string) {

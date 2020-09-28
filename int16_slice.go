@@ -128,6 +128,15 @@ func (f *FlagSet) GetInt16Slice(name string) ([]int16, error) {
 	return val.([]int16), nil
 }
 
+// MustGetInt16Slice is like GetInt16Slice, but panics on error.
+func (f *FlagSet) MustGetInt16Slice(name string) []int16 {
+	val, err := f.GetInt16Slice(name)
+	if err != nil {
+		panic(err)
+	}
+	return val
+}
+
 // Int16SliceVar defines a int16Slice flag with specified name, default value, and usage string.
 // The argument p points to a []int16 variable in which to store the value of the flag.
 func (f *FlagSet) Int16SliceVar(p *[]int16, name string, value []int16, usage string) {
