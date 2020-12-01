@@ -1,12 +1,12 @@
 sudo: false
 
 language: 'go'
+
 arch:
   - 'amd64'
   - 'ppc64le'
+
 go:
-  - '1.9'
-  - '1.10'
   - '1.11'
   - '1.12'
   - '1.13'
@@ -17,6 +17,10 @@ go:
 matrix:
   allow_failures:
     - go: 'tip'
+
+branches:
+  only:
+    - 'master'
 
 install:
   - go get golang.org/x/lint/golint
