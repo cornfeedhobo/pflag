@@ -576,6 +576,10 @@ func UnquoteUsage(flag *Flag) (name string, usage string) {
 			name = ""
 		case "boolSlice":
 			name = "bools"
+		case "complex128":
+			name = "complex"
+		case "complex128Slice":
+			name = "complexes"
 		case "durationSlice":
 			name = "durations"
 		case "float32", "float64":
