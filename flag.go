@@ -101,6 +101,7 @@ type Flag struct {
 	Usage               string              // help message
 	UsageType           string              // flag type displayed in the help message
 	DisableUnquoteUsage bool                // toggle unquoting and extraction of type from usage
+	DisablePrintDefault bool                // toggle printing of the default value in usage message
 	Value               Value               // value as set
 	DefValue            string              // default value (as text); for usage message
 	Changed             bool                // If the user set the value (or if left to default)
@@ -724,7 +725,7 @@ func (f *FlagSet) FlagUsagesWrapped(cols int) string {
 		}
 
 		line += usage
-		if !flag.defaultIsZeroValue() {
+		if !flag.DisablePrintDefault && !flag.defaultIsZeroValue() {
 			if flag.Value.Type() == "string" {
 				line += fmt.Sprintf(" (default %q)", flag.DefValue)
 			} else {

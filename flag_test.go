@@ -1308,6 +1308,7 @@ const defaultOutput = `      --A                         for bootstrapping, allo
       --Z int                     an int that defaults to zero
       --custom custom             custom Value implementation
       --customP custom            a VarP with default (default 10)
+      --disableDefault int        A non-zero int with DisablePrintDefault
       --maxT timeout              set timeout for dial
   -v, --verbose count             verbosity
 `
@@ -1351,6 +1352,8 @@ func TestPrintDefaults(t *testing.T) {
 	fs.StringSlice("StringSlice", []string{}, "string slice with zero default")
 	fs.StringArray("StringArray", []string{}, "string array with zero default")
 	fs.CountP("verbose", "v", "verbosity")
+	fs.Int("disableDefault", -1, "A non-zero int with DisablePrintDefault")
+	fs.Lookup("disableDefault").DisablePrintDefault = true
 
 	var cv customValue
 	fs.Var(&cv, "custom", "custom Value implementation")

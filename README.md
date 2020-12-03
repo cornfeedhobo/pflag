@@ -11,6 +11,7 @@
   * [Installing this fork for cobra](#installing-this-fork-for-cobra)
 * [Documentation](#documentation)
   * [Setting no option default values for flags](#setting-no-option-default-values-for-flags)
+  * [Disable printing default value](#disable-printing-default-value)
   * [Command line flag syntax](#command-line-flag-syntax)
   * [Mutating or "Normalizing" Flag names](#mutating-or-normalizing-flag-names)
   * [Deprecating a flag or its shorthand](#deprecating-a-flag-or-its-shorthand)
@@ -71,6 +72,23 @@ Would result in something like
 | --flagname=1357  | ip=1357         |
 | --flagname       | ip=4321         |
 | [nothing]        | ip=1234         |
+
+### Disable printing default value
+
+The printing of a flag's default value can be suppressed with `Flag.DisablePrintDefault`.
+
+**Example**:
+
+``` go
+flag.Int("in", -1, "help message")
+flag.Lookup("in").DisablePrintDefault = true
+```
+
+**Output**:
+
+``` plain
+  --in int   help message
+```
 
 ### Command line flag syntax
 
