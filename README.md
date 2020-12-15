@@ -1,6 +1,6 @@
 # pflag
 
-***This is a fork of [spf13/pflag](https://github.com/spf13/pflag) due to poor maintenence***
+***This is a fork of [spf13/pflag](https://github.com/spf13/pflag) due to poor maintenance***
 
 [![GoDoc](https://godoc.org/github.com/cornfeedhobo/pflag?status.svg)](https://godoc.org/github.com/cornfeedhobo/pflag)
 [![Go Report Card](https://goreportcard.com/badge/github.com/cornfeedhobo/pflag)](https://goreportcard.com/report/github.com/cornfeedhobo/pflag)
